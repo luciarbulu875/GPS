@@ -20,7 +20,7 @@ body {
     height: 100vh;
     overflow: hidden;
 }
-.slide-obj {
+.slide-frame {
     position: absolute;
     top: 0;
     left: 0;
@@ -31,13 +31,13 @@ body {
     transition: opacity 0.6s ease, transform 0.6s ease;
     transform: translateX(50px);
 }
-.slide-obj.active {
+.slide-frame.active {
     opacity: 1;
     visibility: visible;
     transform: translateX(0);
     z-index: 10;
 }
-.slide-obj object {
+.slide-frame iframe {
     width: 100%;
     height: 100%;
     border: none;
@@ -132,9 +132,15 @@ body {
 </div>
 
 <div class="slide-container">
-    <div class="slide-obj active" id="obj0"><object data="slide1.html" type="text/html"></object></div>
-    <div class="slide-obj" id="obj1"><object data="slide2.html" type="text/html"></object></div>
-    <div class="slide-obj" id="obj2"><object data="slide3.html" type="text/html"></object></div>
+    <div class="slide-frame active" id="frame0">
+        <iframe src="slide1.html" frameborder="0" scrolling="auto"></iframe>
+    </div>
+    <div class="slide-frame" id="frame1">
+        <iframe src="slide2.html" frameborder="0" scrolling="auto"></iframe>
+    </div>
+    <div class="slide-frame" id="frame2">
+        <iframe src="slide3.html" frameborder="0" scrolling="auto"></iframe>
+    </div>
 </div>
 
 <script>
@@ -143,19 +149,38 @@ const totalSlides = 3;
 const names = ['Ventas 2025', 'Rentabilidad 2025', 'Evolución 2020-2025'];
 
 function updateNav() {
-    document.querySelectorAll('.slide-obj').forEach((el, i) => el.classList.toggle('active', i === currentSlide));
-    document.querySelectorAll('.slide-dot').forEach((el, i) => el.classList.toggle('active', i === currentSlide));
+    document.querySelectorAll('.slide-frame').forEach((el, i) => {
+        el.classList.toggle('active', i === currentSlide);
+    });
+    document.querySelectorAll('.slide-dot').forEach((el, i) => {
+        el.classList.toggle('active', i === currentSlide);
+    });
     document.getElementById('slideLabel').textContent = names[currentSlide];
     document.getElementById('navPrev').classList.toggle('visible', currentSlide > 0);
     document.getElementById('navNext').classList.toggle('visible', currentSlide < totalSlides - 1);
 }
-function goToSlide(i) { if (i >= 0 && i < totalSlides) { currentSlide = i; updateNav(); } }
+
+function goToSlide(i) { 
+    if (i >= 0 && i < totalSlides) { 
+        currentSlide = i; 
+        updateNav(); 
+    } 
+}
+
 function nextSlide() { goToSlide(currentSlide + 1); }
 function prevSlide() { goToSlide(currentSlide - 1); }
+
 document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
-    else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+    if (e.key === 'ArrowRight' || e.key === ' ') { 
+        e.preventDefault(); 
+        nextSlide(); 
+    }
+    else if (e.key === 'ArrowLeft') { 
+        e.preventDefault(); 
+        prevSlide(); 
+    }
 });
+
 updateNav();
 </script>
 
