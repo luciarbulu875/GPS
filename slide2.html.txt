@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rentabilidad 2025 - GPS Group</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+  color: #fff;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 0; border-bottom: 2px solid rgba(56, 189, 248, 0.3);
+  margin-bottom: 25px; flex-wrap: wrap; gap: 15px;
+}
+.logo-area { display: flex; align-items: center; gap: 15px; }
+.logo-gps {
+  width: 70px; height: 70px; border-radius: 12px; object-fit: contain;
+  background: transparent; filter: drop-shadow(0 0 10px rgba(0, 168, 232, 0.3));
+}
+.title-area h1 {
+  font-size: 28px; font-weight: 700;
+  background: linear-gradient(90deg, #38BDF8, #00C9A7);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.title-area p { color: #94A3B8; font-size: 14px; margin-top: 4px; }
+.total-card {
+  background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(0,201,167,0.1));
+  border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 16px;
+  padding: 18px 28px; text-align: center; cursor: pointer;
+  transition: all 0.3s ease; position: relative;
+}
+.total-card:hover {
+  transform: scale(1.05); box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+  border-color: #38BDF8;
+}
+.total-card .label { font-size: 12px; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; }
+.total-card .value { font-size: 32px; font-weight: 800; color: #38BDF8; margin-top: 4px; }
+.total-card .sub { font-size: 13px; color: #64748B; margin-top: 2px; }
+.total-card .click-hint {
+  position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
+  font-size: 10px; color: #38BDF8; opacity: 0; transition: opacity 0.3s; white-space: nowrap;
+}
+.total-card:hover .click-hint { opacity: 1; }
+.main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px; }
+.chart-box {
+  background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(56, 189, 248, 0.15);
+  border-radius: 20px; padding: 25px; backdrop-filter: blur(10px);
+}
+.chart-box h2 { font-size: 16px; font-weight: 600; color: #E2E8F0; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+.chart-box h2 .icon { font-size: 20px; }
+.donut-container { position: relative; height: 380px; display: flex; align-items: center; justify-content: center; }
+.donut-center { position: absolute; text-align: center; pointer-events: none; transition: all 0.5s ease; }
+.donut-center .big { font-size: 36px; font-weight: 800; color: #38BDF8; transition: all 0.5s ease; }
+.donut-center .small { font-size: 13px; color: #94A3B8; transition: all 0.5s ease; }
+.donut-center .micro { font-size: 11px; color: #64748B; margin-top: 2px; }
+.ranking-box { max-height: 420px; overflow-y: auto; }
+.ranking-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+  border-radius: 12px; cursor: pointer; transition: all 0.3s ease;
+  margin-bottom: 6px; border: 1px solid transparent;
+}
+.ranking-item:hover { background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.3); transform: translateX(4px); }
+.ranking-item.active { background: rgba(56, 189, 248, 0.15); border-color: #38BDF8; }
+.ranking-item .rank {
+  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; background: rgba(56, 189, 248, 0.2); color: #38BDF8; flex-shrink: 0;
+}
+.ranking-item .rank.top3 { background: linear-gradient(135deg, #FFD700, #FFA500); color: #1E293B; }
+.ranking-item .info { flex: 1; min-width: 0; }
+.ranking-item .name { font-size: 13px; font-weight: 600; color: #E2E8F0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ranking-item .division { font-size: 11px; color: #64748B; }
+.ranking-item .bar-bg { width: 80px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+.ranking-item .bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.ranking-item .pct { font-size: 14px; font-weight: 700; width: 55px; text-align: right; flex-shrink: 0; }
+.detail-card {
+  background: linear-gradient(135deg, rgba(56,189,248,0.1), rgba(0,201,167,0.05));
+  border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 20px;
+  padding: 25px; margin-bottom: 25px; display: none;
+}
+.detail-card.show { display: block; animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.detail-title { font-size: 22px; font-weight: 700; color: #fff; }
+.detail-subtitle { font-size: 14px; color: #94A3B8; margin-top: 2px; }
+.detail-division-tag { font-size: 12px; padding: 4px 12px; border-radius: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.detail-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+.detail-stat { background: rgba(15, 23, 42, 0.5); border-radius: 14px; padding: 18px; text-align: center; }
+.detail-stat .label { font-size: 11px; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; }
+.detail-stat .value { font-size: 24px; font-weight: 800; margin-top: 6px; }
+.detail-stat .value.positive { color: #00C9A7; }
+.detail-stat .value.negative { color: #EF4444; }
+.detail-stat .value.neutral { color: #38BDF8; }
+.evolucion-chart { height: 250px; margin-top: 20px; }
+.controls { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+.btn { padding: 10px 20px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.1); color: #94A3B8; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+.btn:hover, .btn.active { background: rgba(56, 189, 248, 0.25); color: #38BDF8; border-color: #38BDF8; }
+.btn-reset { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #EF4444; }
+.btn-reset:hover { background: rgba(239, 68, 68, 0.3); color: #FCA5A5; }
+.division-filters { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 15px; }
+.div-chip { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; opacity: 0.7; }
+.div-chip:hover { opacity: 1; transform: scale(1.05); }
+.div-chip.active { opacity: 1; border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+.footer { text-align: center; padding: 20px; color: #475569; font-size: 12px; border-top: 1px solid rgba(56, 189, 248, 0.1); margin-top: 20px; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius: 3px; }
+@media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } .detail-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+<base target="_blank">
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo-area">
+      <img src="data:image/png;base64,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" alt="GPS Logo" class="logo-gps">
+      <div class="title-area">
+        <h1>Rentabilidad 2025</h1>
+        <p>% Margen Comercial por Empresa - Grupo GPS</p>
+      </div>
+    </div>
+    <div class="total-card" id="totalCard">
+      <div class="label">Total GPS 2025</div>
+      <div class="value" id="centerBig">14.18%</div>
+      <div class="sub" id="centerSmall">S/ 125,232,042</div>
+      <div class="click-hint">Click para ver evolucion</div>
+    </div>
+  </div>
+  <div class="division-filters" id="divFilters"></div>
+  <div class="main-grid">
+    <div class="chart-box">
+      <h2><span class="icon">&#127856;</span> Distribucion % Margen Comercial <span id="donutSubtitle">2025</span></h2>
+      <div class="donut-container">
+        <canvas id="donutChart"></canvas>
+        <div class="donut-center" id="donutCenter">
+          <div class="big" id="donutBig">14.18%</div>
+          <div class="small" id="donutSmall">Total GPS</div>
+          <div class="micro" id="donutMicro">22 empresas</div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-box">
+      <h2><span class="icon">&#128202;</span> Ranking por % Rentabilidad</h2>
+      <div class="ranking-box" id="rankingList"></div>
+    </div>
+  </div>
+  <div class="detail-card" id="detailCard">
+    <div class="detail-header">
+      <div>
+        <div class="detail-title" id="detailTitle">Empresa</div>
+        <div class="detail-subtitle" id="detailSubtitle"></div>
+        <span class="detail-division-tag" id="detailDivisionTag">DIVISION</span>
+      </div>
+      <button class="btn btn-reset" id="btnClose">Cerrar</button>
+    </div>
+    <div class="detail-grid" id="detailGrid"></div>
+    <div class="evolucion-chart"><canvas id="evolucionChart"></canvas></div>
+  </div>
+  <div class="controls">
+    <button class="btn btn-reset" id="btnReset">Reiniciar Vista</button>
+  </div>
+  <div class="footer">
+    Grupo GPS - Presentacion Interactiva Rentabilidad 2025 | Datos actualizados al cierre 2025
+  </div>
+</div>
+
+<script>
+const rentData = [{"empresa": "CIIA INMOBILIARIA", "division": "INMOBILIARIA", "monto_2025": 12312305.320000004, "pct_2025": 71.4, "evolucion": {"2018": {"monto": null, "pct": null}, "2019": {"monto": null, "pct": null}, "2020": {"monto": 740502.4628, "pct": 77.52}, "2021": {"monto": 1851821.35, "pct": 84.24}, "2022": {"monto": 9337116.620000001, "pct": 92.75}, "2023": {"monto": 6194190.86, "pct": 73.1}, "2024": {"monto": 7947513.59, "pct": 75.03}, "2025": {"monto": 12312305.320000004, "pct": 71.4}}, "color": "#9B59B6"}, {"empresa": "IIS INMOBILIARIA", "division": "INMOBILIARIA", "monto_2025": 458424.1899999998, "pct_2025": 42.45, "evolucion": {"2018": {"monto": null, "pct": null}, "2019": {"monto": null, "pct": null}, "2020": {"monto": null, "pct": null}, "2021": {"monto": 36138.59, "pct": 64.25}, "2022": {"monto": 475656.4600000002, "pct": 46.63}, "2023": {"monto": 485525.20000000007, "pct": 44.96}, "2024": {"monto": 486779.7599999999, "pct": 45.07}, "2025": {"monto": 458424.1899999998, "pct": 42.45}}, "color": "#9B59B6"}, {"empresa": "MISA INMOBILIARIA", "division": "INMOBILIARIA", "monto_2025": 244219.0, "pct_2025": 32.3, "evolucion": {"2018": {"monto": 1120871.0, "pct": 74.05}, "2019": {"monto": 792568.0, "pct": 38.93}, "2020": {"monto": 1365636.0, "pct": 74.05}, "2021": {"monto": 1653712.0, "pct": 75.77}, "2022": {"monto": 1698018.0, "pct": 73.66}, "2023": {"monto": 1895550.0199999998, "pct": 76.38}, "2024": {"monto": 1928577.2100000004, "pct": 79.84}, "2025": {"monto": 244219.0, "pct": 32.3}}, "color": "#9B59B6"}, {"empresa": "ROMA PANETON", "division": "PANETON", "monto_2025": 1334676.0, "pct_2025": 32.08, "evolucion": {"2018": {"monto": null, "pct": null}, "2019": {"monto": 441489.0, "pct": 22.41}, "2020": {"monto": 584994.0, "pct": 30.66}, "2021": {"monto": 796429.0, "pct": 24.86}, "2022": {"monto": 951584.0, "pct": 24.01}, "2023": {"monto": 811664.0, "pct": 23.67}, "2024": {"monto": 1077448.0, "pct": 26.46}, "2025": {"monto": 1334676.0, "pct": 32.08}}, "color": "#E74C3C"}, {"empresa": "ROMA PANIFICACION", "division": "PANIFICACION", "monto_2025": 239661.0, "pct_2025": 29.37, "evolucion": {"2018": {"monto": null, "pct": null}, "2019": {"monto": null, "pct": null}, "2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": null, "pct": null}, "2024": {"monto": null, "pct": 26.46}, "2025": {"monto": 239661.0, "pct": 29.37}}, "color": "#E67E22"}, {"empresa": "ALSE BEBIDAS", "division": "BEBIDAS", "monto_2025": 11560886.0, "pct_2025": 25.0, "evolucion": {"2018": {"monto": 3033874.0, "pct": 17.16}, "2019": {"monto": 4429786.0, "pct": 18.49}, "2020": {"monto": 4850184.0, "pct": 18.21}, "2021": {"monto": 7786635.0, "pct": 19.11}, "2022": {"monto": 10008555.0, "pct": 20.82}, "2023": {"monto": 11562836.0, "pct": 25.01}, "2024": {"monto": 9649144.0, "pct": 21.13}, "2025": {"monto": 11560886.0, "pct": 25.0}}, "color": "#00C9A7"}, {"empresa": "CHASQUICARGO", "division": "CHASQUICARGO", "monto_2025": 2576187.0, "pct_2025": 20.24, "evolucion": {"2018": {"monto": 596995.0, "pct": 6.68}, "2019": {"monto": 981719.0, "pct": 10.33}, "2020": {"monto": 1560194.0, "pct": 19.12}, "2021": {"monto": 869660.0, "pct": 9.39}, "2022": {"monto": 886241.0, "pct": 7.9}, "2023": {"monto": 1371772.0, "pct": 11.98}, "2024": {"monto": 2286924.0, "pct": 18.1}, "2025": {"monto": 2576187.0, "pct": 20.24}}, "color": "#38BDF8"}, {"empresa": "INKATEL", "division": "INKATEL", "monto_2025": 99393.55, "pct_2025": 18.34, "evolucion": {"2018": {"monto": 57881.0, "pct": 18.89}, "2019": {"monto": 59325.0, "pct": 23.36}, "2020": {"monto": 89801.0, "pct": 30.38}, "2021": {"monto": 49121.0, "pct": 21.77}, "2022": {"monto": 101595.0, "pct": 22.03}, "2023": {"monto": 59327.71, "pct": 20.56}, "2024": {"monto": 66069.22, "pct": 20.95}, "2025": {"monto": 99393.55, "pct": 18.34}}, "color": "#38BDF8"}, {"empresa": "IKM FC", "division": "FC", "monto_2025": 1832374.0, "pct_2025": 17.91, "evolucion": {"2018": {"monto": null, "pct": null}, "2019": {"monto": null, "pct": null}, "2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": 519570.9758252648, "pct": 21.1}, "2024": {"monto": 1404739.15775482, "pct": 18.25}, "2025": {"monto": 1832374.0, "pct": 17.91}}, "color": "#3498DB"}, {"empresa": "MISA BEBIDAS", "division": "BEBIDAS", "monto_2025": 12811141.0, "pct_2025": 16.56, "evolucion": {"2018": {"monto": 15994146.805337053, "pct": 24.69}, "2019": {"monto": 11202352.581566153, "pct": 21.35}, "2020": {"monto": 10854988.560617732, "pct": 22.19}, "2021": {"monto": 12373095.868394438, "pct": 20.07}, "2022": {"monto": 13081421.143100679, "pct": 18.44}, "2023": {"monto": 14195651.0, "pct": 17.03}, "2024": {"monto": 13002770.0, "pct": 17.04}, "2025": {"monto": 12811141.0, "pct": 16.56}}, "color": "#00C9A7"}, {"empresa": "DESEL ABARROTES", "division": "ABARROTES", "monto_2025": 3807236.0, "pct_2025": 14.56, "evolucion": {"2018": {"monto": 550526.0, "pct": 14.02}, "2019": {"monto": 1452345.162700201, "pct": 9.41}, "2020": {"monto": 2922127.872507246, "pct": 14.02}, "2021": {"monto": 3294576.914310298, "pct": 15.09}, "2022": {"monto": 3497179.020537824, "pct": 15.18}, "2023": {"monto": 3126976.7342989575, "pct": 13.55}, "2024": {"monto": 3548335.81772051, "pct": 15.2}, "2025": {"monto": 3807236.0, "pct": 14.56}}, "color": "#FF6B35"}, {"empresa": "IKM MERMELADA", "division": "MERMELADA", "monto_2025": 376786.3000000005, "pct_2025": 13.36, "evolucion": {"2018": {"monto": null, "pct": null}, "2019": {"monto": null, "pct": null}, "2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": -52482.0, "pct": -3.55}, "2023": {"monto": -11681.295608275388, "pct": -0.72}, "2024": {"monto": -30042.7651620977, "pct": -1.46}, "2025": {"monto": 376786.3000000005, "pct": 13.36}}, "color": "#F39C12"}, {"empresa": "DEPSA ABARROTES", "division": "ABARROTES", "monto_2025": 33235923.43074078, "pct_2025": 12.37, "evolucion": {"2018": {"monto": 15913129.558135603, "pct": 11.21}, "2019": {"monto": 19548477.16271668, "pct": 11.33}, "2020": {"monto": 24556530.350000016, "pct": 13.08}, "2021": {"monto": 24710639.869999997, "pct": 13.26}, "2022": {"monto": 29483503.479999937, "pct": 13.52}, "2023": {"monto": 28151228.359999973, "pct": 12.65}, "2024": {"monto": 29257235.32559018, "pct": 12.33}, "2025": {"monto": 33235923.43074078, "pct": 12.37}}, "color": "#FF6B35"}, {"empresa": "E+ ABARROTES", "division": "ABARROTES", "monto_2025": 10552764.63999998, "pct_2025": 12.24, "evolucion": {"2018": {"monto": null, "pct": null}, "2019": {"monto": null, "pct": null}, "2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": 10391331.31639945, "pct": 13.41}, "2024": {"monto": 11377946.089999994, "pct": 12.55}, "2025": {"monto": 10552764.63999998, "pct": 12.24}}, "color": "#FF6B35"}, {"empresa": "MISA LICORES", "division": "LICORES", "monto_2025": 725777.1200000001, "pct_2025": 11.91, "evolucion": {"2018": {"monto": null, "pct": null}, "2019": {"monto": null, "pct": null}, "2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": 112146.0, "pct": 11.69}, "2024": {"monto": 576463.510000001, "pct": 11.88}, "2025": {"monto": 725777.1200000001, "pct": 11.91}}, "color": "#1ABC9C"}, {"empresa": "ALSE ABARROTES", "division": "ABARROTES", "monto_2025": 28524299.0, "pct_2025": 11.58, "evolucion": {"2018": {"monto": 13623083.0, "pct": 9.84}, "2019": {"monto": 13663568.0, "pct": 9.95}, "2020": {"monto": 20836089.0, "pct": 12.12}, "2021": {"monto": 23208577.0, "pct": 12.38}, "2022": {"monto": 27300166.0, "pct": 12.77}, "2023": {"monto": 25503296.0, "pct": 11.9}, "2024": {"monto": 24533744.0, "pct": 11.66}, "2025": {"monto": 28524299.0, "pct": 11.58}}, "color": "#FF6B35"}, {"empresa": "PANES PRODUCCION", "division": "PRODUCCION", "monto_2025": 1022551.0, "pct_2025": 9.82, "evolucion": {"2018": {"monto": null, "pct": null}, "2019": {"monto": null, "pct": null}, "2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": 480710.0, "pct": 6.44}, "2023": {"monto": 24958.0, "pct": 0.16}, "2024": {"monto": -1025301.0, "pct": -7.39}, "2025": {"monto": 1022551.0, "pct": 9.82}}, "color": "#0056D2"}, {"empresa": "PETRORED", "division": "PETRORED", "monto_2025": 2804483.0, "pct_2025": 8.15, "evolucion": {"2018": {"monto": 428214.0, "pct": 8.4}, "2019": {"monto": 461508.0, "pct": 8.68}, "2020": {"monto": 517217.0, "pct": 9.88}, "2021": {"monto": 880838.0, "pct": 8.32}, "2022": {"monto": 1365951.0, "pct": 5.82}, "2023": {"monto": 1253136.0, "pct": 6.02}, "2024": {"monto": 1629963.0, "pct": 6.75}, "2025": {"monto": 2804483.0, "pct": 8.15}}, "color": "#38BDF8"}, {"empresa": "DEPSA PRODUCCION", "division": "PRODUCCION", "monto_2025": 890076.0, "pct_2025": 3.37, "evolucion": {"2018": {"monto": null, "pct": null}, "2019": {"monto": null, "pct": null}, "2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": 992923.0, "pct": 12.38}, "2024": {"monto": 1503565.0, "pct": 4.55}, "2025": {"monto": 890076.0, "pct": 3.37}}, "color": "#0056D2"}, {"empresa": "PERU PAST PRODUCCION", "division": "PRODUCCION", "monto_2025": 58785.0, "pct_2025": 2.66, "evolucion": {"2018": {"monto": null, "pct": null}, "2019": {"monto": null, "pct": null}, "2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": null, "pct": null}, "2024": {"monto": 104855.0, "pct": 8.51}, "2025": {"monto": 58785.0, "pct": 2.66}}, "color": "#0056D2"}, {"empresa": "PO-PLAST PRODUCCION", "division": "PRODUCCION", "monto_2025": -116368.0, "pct_2025": -4.25, "evolucion": {"2018": {"monto": null, "pct": null}, "2019": {"monto": null, "pct": null}, "2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": null, "pct": null}, "2024": {"monto": -258628.0, "pct": -23.11}, "2025": {"monto": -116368.0, "pct": -4.25}}, "color": "#0056D2"}, {"empresa": "AGROSAN PRODUCCION", "division": "PRODUCCION", "monto_2025": -119539.0, "pct_2025": -5.14, "evolucion": {"2018": {"monto": null, "pct": null}, "2019": {"monto": 392940.0, "pct": 15.46}, "2020": {"monto": 364541.0, "pct": 19.83}, "2021": {"monto": -55414.0, "pct": -2.24}, "2022": {"monto": 84854.0, "pct": 2.22}, "2023": {"monto": 557592.0, "pct": 12.14}, "2024": {"monto": 178051.0, "pct": 5.72}, "2025": {"monto": -119539.0, "pct": -5.14}}, "color": "#0056D2"}];
+const totalGpsEvolucion = {"2018": {"monto": 51318720.363472655, "pct": 13.41}, "2019": {"monto": 53426077.90698303, "pct": 12.62}, "2020": {"monto": 69242805.245925, "pct": 14.48}, "2021": {"monto": 77455830.59270474, "pct": 14.62}, "2022": {"monto": 98700068.72363845, "pct": 15.39}, "2023": {"monto": 107197993.88091537, "pct": 14.28}, "2024": {"monto": 109246151.91590342, "pct": 13.51}, "2025": {"monto": 125232041.55074078, "pct": 14.18}};
+const divisionAvgPct = {"PANIFICACION": 29.37, "CHASQUICARGO": 20.24, "INKATEL": 18.34, "FC": 17.91, "ABARROTES": 12.69, "PANETON": 32.08, "PRODUCCION": 1.29, "INMOBILIARIA": 48.72, "PETRORED": 8.15, "LICORES": 11.91, "BEBIDAS": 20.78, "MERMELADA": 13.36};
+const divisionColors = {
+    'INMOBILIARIA': '#9B59B6',
+    'BEBIDAS': '#00C9A7',
+    'ABARROTES': '#FF6B35',
+    'PRODUCCION': '#0056D2',
+    'VARIOS': '#6C757D',
+    'PANETON': '#E74C3C',
+    'PANIFICACION': '#E67E22',
+    'FC': '#3498DB',
+    'LICORES': '#1ABC9C',
+    'MERMELADA': '#F39C12',
+    'GRIFOS': '#95A5A6',
+    'OTROS': '#BDC3C7',
+    'OPERADOR': '#F1C40F',
+    'LOGISTICO': '#F1C40F'
+};
+
+let donutChart = null;
+let evolucionChart = null;
+let selectedEmpresa = null;
+let activeDivision = 'TODAS';
+let isTotalGPSMode = false;
+
+function getFilteredData() {
+  if (activeDivision === 'TODAS') return rentData;
+  return rentData.filter(function(d) {
+    return d.division.toUpperCase().indexOf(activeDivision.toUpperCase()) !== -1;
+  });
+}
+
+function formatMonto(v) {
+  if (v >= 1000000) return 'S/ ' + (v/1000000).toFixed(2) + 'M';
+  if (v >= 1000) return 'S/ ' + (v/1000).toFixed(1) + 'K';
+  return 'S/ ' + v.toFixed(0);
+}
+
+// DIVISION FILTERS
+function renderDivisionFilters() {
+  var divs = [];
+  rentData.forEach(function(d) {
+    if (divs.indexOf(d.division) === -1) divs.push(d.division);
+  });
+  var container = document.getElementById('divFilters');
+  var html = '';
+  html += '<div class="div-chip active" style="background: linear-gradient(135deg, #38BDF8, #00C9A7); color: #fff;" data-div="TODAS">TODAS</div>';
+  divs.forEach(function(div) {
+    var color = divisionColors[div.toUpperCase()] || '#38BDF8';
+    html += '<div class="div-chip" style="background: ' + color + '20; color: ' + color + '; border: 1px solid ' + color + '40;" data-div="' + div + '">' + div + '</div>';
+  });
+  container.innerHTML = html;
+
+  // Event listeners para chips
+  container.querySelectorAll('.div-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      filterDivision(chip.dataset.div);
+    });
+  });
+}
+
+function filterDivision(div) {
+  activeDivision = div;
+  isTotalGPSMode = false;
+  var chips = document.querySelectorAll('.div-chip');
+  chips.forEach(function(c) {
+    c.classList.toggle('active', c.dataset.div === div);
+  });
+  updateDonutCenter(div);
+  updateDonut();
+  renderRanking();
+  closeDetail();
+}
+
+function updateDonutCenter(div) {
+  var big = document.getElementById('donutBig');
+  var small = document.getElementById('donutSmall');
+  var micro = document.getElementById('donutMicro');
+  var totalBig = document.getElementById('centerBig');
+  var totalSmall = document.getElementById('centerSmall');
+
+  if (div === 'TODAS') {
+    big.textContent = '14.18%';
+    small.textContent = 'Total GPS';
+    micro.textContent = '22 empresas';
+    totalBig.textContent = '14.18%';
+    totalSmall.textContent = 'S/ 125,232,042';
+  } else {
+    var pct = divisionAvgPct[div] || 0;
+    var filtered = getFilteredData();
+    var totalMonto = filtered.reduce(function(s, d) { return s + d.monto_2025; }, 0);
+    big.textContent = pct.toFixed(2) + '%';
+    small.textContent = div;
+    micro.textContent = filtered.length + ' empresas';
+    totalBig.textContent = pct.toFixed(2) + '%';
+    totalSmall.textContent = formatMonto(totalMonto);
+  }
+}
+
+// DONUT CHART
+function initDonut() {
+  var ctx = document.getElementById('donutChart').getContext('2d');
+  var data = getFilteredData();
+
+  var labels = data.map(function(d) { return d.empresa; });
+  var values = data.map(function(d) { return d.pct_2025; });
+  var colors = data.map(function(d) { return d.color; });
+
+  donutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        borderColor: '#0F172A',
+        borderWidth: 3,
+        hoverBorderWidth: 5,
+        hoverBorderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '60%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+          titleColor: '#38BDF8',
+          bodyColor: '#E2E8F0',
+          borderColor: 'rgba(56, 189, 248, 0.3)',
+          borderWidth: 1,
+          padding: 14,
+          callbacks: {
+            label: function(context) {
+              var idx = context.dataIndex;
+              var d = data[idx];
+              return d.empresa + ': ' + d.pct_2025.toFixed(2) + '%';
+            }
+          }
+        }
+      },
+      onClick: function(e, elements) {
+        if (elements.length > 0) {
+          var idx = elements[0].index;
+          selectEmpresa(data[idx].empresa);
+        }
+      },
+      onHover: function(e, elements) {
+        e.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+      }
+    }
+  });
+}
+
+function updateDonut() {
+  if (!donutChart) return;
+  var data = getFilteredData();
+  donutChart.data.labels = data.map(function(d) { return d.empresa; });
+  donutChart.data.datasets[0].data = data.map(function(d) { return d.pct_2025; });
+  donutChart.data.datasets[0].backgroundColor = data.map(function(d) { return d.color; });
+  donutChart.update();
+  document.getElementById('donutSubtitle').textContent = activeDivision === 'TODAS' ? '2025' : activeDivision;
+}
+
+// RANKING
+function renderRanking() {
+  var data = getFilteredData();
+  var container = document.getElementById('rankingList');
+  var maxPct = Math.max.apply(null, data.map(function(d) { return d.pct_2025; }));
+
+  var html = '';
+  data.forEach(function(d, i) {
+    var isActive = selectedEmpresa === d.empresa ? 'active' : '';
+    var isTop3 = i < 3 ? 'top3' : '';
+    var width = (d.pct_2025 / maxPct * 100).toFixed(1);
+    html += '<div class="ranking-item ' + isActive + '" data-empresa="' + d.empresa + '">' +
+      '<div class="rank ' + isTop3 + '">' + (i + 1) + '</div>' +
+      '<div class="info"><div class="name">' + d.empresa + '</div><div class="division">' + d.division + '</div></div>' +
+      '<div class="bar-bg"><div class="bar-fill" style="width: ' + width + '%; background: ' + d.color + ';"></div></div>' +
+      '<div class="pct" style="color: ' + d.color + ';">' + d.pct_2025.toFixed(2) + '%</div>' +
+      '</div>';
+  });
+  container.innerHTML = html;
+
+  // Event listeners para ranking items
+  container.querySelectorAll('.ranking-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      selectEmpresa(item.dataset.empresa);
+    });
+  });
+}
+
+// SELECT EMPRESA
+function selectEmpresa(empresa) {
+  selectedEmpresa = empresa;
+  isTotalGPSMode = false;
+  var d = null;
+  for (var i = 0; i < rentData.length; i++) {
+    if (rentData[i].empresa === empresa) { d = rentData[i]; break; }
+  }
+  if (!d) return;
+
+  var items = document.querySelectorAll('.ranking-item');
+  items.forEach(function(item) {
+    item.classList.toggle('active', item.dataset.empresa === empresa);
+  });
+
+  document.getElementById('donutBig').textContent = d.pct_2025.toFixed(2) + '%';
+  document.getElementById('donutSmall').textContent = d.empresa;
+  document.getElementById('donutMicro').textContent = d.division;
+
+  var filtered = getFilteredData();
+  var rank = 0;
+  for (var j = 0; j < filtered.length; j++) {
+    if (filtered[j].empresa === empresa) { rank = j + 1; break; }
+  }
+
+  showDetailCard(d.empresa, d.division, d.color, [
+    { label: '% Margen 2025', value: d.pct_2025.toFixed(2) + '%', colorClass: d.pct_2025 > 0 ? 'positive' : 'negative' },
+    { label: 'Monto 2025', value: formatMonto(d.monto_2025), colorClass: 'neutral' },
+    { label: 'Ranking', value: '#' + rank, colorClass: 'neutral' },
+    { label: 'Division', value: d.division, colorClass: 'neutral' }
+  ]);
+
+  renderEvolucion(d.evolucion, d.color, d.empresa);
+}
+
+// SHOW TOTAL GPS
+function showTotalGPS() {
+  isTotalGPSMode = true;
+  selectedEmpresa = null;
+
+  var items = document.querySelectorAll('.ranking-item');
+  items.forEach(function(item) { item.classList.remove('active'); });
+
+  showDetailCard('TOTAL GPS', 'TODAS', '#38BDF8', [
+    { label: '% Margen 2025', value: '14.18%', colorClass: 'positive' },
+    { label: 'Monto 2025', value: 'S/ 125,232,042', colorClass: 'neutral' },
+    { label: 'Empresas', value: '22', colorClass: 'neutral' },
+    { label: 'Promedio', value: '0.64%', colorClass: 'neutral' }
+  ]);
+
+  renderEvolucion(totalGpsEvolucion, '#38BDF8', 'TOTAL GPS');
+}
+
+function showDetailCard(title, division, color, stats) {
+  var card = document.getElementById('detailCard');
+  card.classList.add('show');
+
+  document.getElementById('detailTitle').textContent = title;
+  document.getElementById('detailSubtitle').textContent = isTotalGPSMode ? 'Evolucion del Grupo GPS 2018-2025' : '';
+
+  var tag = document.getElementById('detailDivisionTag');
+  tag.textContent = division;
+  tag.style.background = color + '30';
+  tag.style.color = color;
+  tag.style.border = '1px solid ' + color + '60';
+
+  var grid = document.getElementById('detailGrid');
+  var gridHtml = '';
+  stats.forEach(function(s) {
+    gridHtml += '<div class="detail-stat"><div class="label">' + s.label + '</div><div class="value ' + s.colorClass + '">' + s.value + '</div></div>';
+  });
+  grid.innerHTML = gridHtml;
+}
+
+function renderEvolucion(evolucionData, color, title) {
+  var ctx = document.getElementById('evolucionChart').getContext('2d');
+  var years = ['2018','2019','2020','2021','2022','2023','2024','2025'];
+  var pcts = years.map(function(y) {
+    return evolucionData[y] && evolucionData[y].pct !== null ? evolucionData[y].pct : null;
+  });
+  var montos = years.map(function(y) {
+    return evolucionData[y] && evolucionData[y].monto !== null ? evolucionData[y].monto / 1000000 : null;
+  });
+
+  if (evolucionChart) {
+    evolucionChart.destroy();
+    evolucionChart = null;
+  }
+
+  evolucionChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: years,
+      datasets: [
+        {
+          label: '% Margen Comercial',
+          data: pcts,
+          borderColor: color,
+          backgroundColor: color + '20',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 6,
+          pointHoverRadius: 10,
+          pointBackgroundColor: color,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          yAxisID: 'y'
+        },
+        {
+          label: 'Monto (Millones S/)',
+          data: montos,
+          borderColor: '#38BDF8',
+          backgroundColor: 'transparent',
+          borderDash: [5, 5],
+          tension: 0.4,
+          pointRadius: 4,
+          pointHoverRadius: 8,
+          yAxisID: 'y1'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: { color: '#94A3B8', font: { size: 12 } }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+          titleColor: '#38BDF8',
+          bodyColor: '#E2E8F0',
+          borderColor: 'rgba(56, 189, 248, 0.3)',
+          borderWidth: 1,
+          padding: 12
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#94A3B8' },
+          grid: { color: 'rgba(255,255,255,0.05)' }
+        },
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          ticks: { color: color, callback: function(v) { return v + '%'; } },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          title: { display: true, text: '% Margen', color: color }
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          ticks: { color: '#38BDF8', callback: function(v) { return 'S/' + v.toFixed(1) + 'M'; } },
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: 'Monto (M)', color: '#38BDF8' }
+        }
+      }
+    }
+  });
+}
+
+function closeDetail() {
+  document.getElementById('detailCard').classList.remove('show');
+  selectedEmpresa = null;
+  isTotalGPSMode = false;
+  updateDonutCenter(activeDivision);
+}
+
+function resetAll() {
+  activeDivision = 'TODAS';
+  selectedEmpresa = null;
+  isTotalGPSMode = false;
+
+  var chips = document.querySelectorAll('.div-chip');
+  chips.forEach(function(c) {
+    c.classList.toggle('active', c.dataset.div === 'TODAS');
+  });
+
+  updateDonutCenter('TODAS');
+  updateDonut();
+  renderRanking();
+  closeDetail();
+}
+
+// INICIALIZACION - Event listeners en botones (NO onclick inline)
+document.addEventListener('DOMContentLoaded', function() {
+  // Total card click
+  document.getElementById('totalCard').addEventListener('click', showTotalGPS);
+
+  // Close button
+  document.getElementById('btnClose').addEventListener('click', closeDetail);
+
+  // Reset button
+  document.getElementById('btnReset').addEventListener('click', resetAll);
+
+  // Inicializar
+  renderDivisionFilters();
+  initDonut();
+  renderRanking();
+});
+</script>
+</body>
+</html>

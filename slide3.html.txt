@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ventas Netas 2020-2025 - El Ascenso de GPS</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 30%, #0f172a 60%, #1e293b 100%);
+  color: #fff; min-height: 100vh; overflow-x: hidden;
+}
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.container { max-width: 1500px; margin: 0 auto; padding: 20px; }
+
+/* HEADER */
+.header { display: flex; align-items: center; justify-content: space-between; padding: 25px 0; border-bottom: 2px solid rgba(56,189,248,0.3); margin-bottom: 30px; flex-wrap: wrap; gap: 20px; }
+.logo-area { display: flex; align-items: center; gap: 20px; }
+.logo-gps { width: 75px; height: 75px; border-radius: 16px; object-fit: contain; filter: drop-shadow(0 0 15px rgba(0,168,232,0.4)); animation: float 3s ease-in-out infinite; }
+.title-area h1 { font-size: 32px; font-weight: 800; background: linear-gradient(90deg, #38BDF8, #00C9A7, #38BDF8); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 3s linear infinite; }
+.title-area p { color: #94A3B8; font-size: 15px; margin-top: 6px; letter-spacing: 0.5px; }
+
+/* HERO */
+.hero-section { background: linear-gradient(135deg, rgba(0,86,210,0.15), rgba(56,189,248,0.1), rgba(0,201,167,0.05)); border: 1px solid rgba(56,189,248,0.25); border-radius: 24px; padding: 35px; margin-bottom: 30px; position: relative; overflow: hidden; }
+.hero-section::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%); animation: pulse 4s ease-in-out infinite; pointer-events: none; }
+@keyframes pulse { 0%,100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 0.8; } }
+.hero-title { font-size: 14px; color: #38BDF8; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.hero-title .star { font-size: 20px; }
+.hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 25px; }
+.hero-stat { background: rgba(15,23,42,0.6); border: 1px solid rgba(56,189,248,0.15); border-radius: 16px; padding: 22px; text-align: center; backdrop-filter: blur(10px); transition: all 0.3s ease; }
+.hero-stat:hover { transform: translateY(-5px); border-color: rgba(56,189,248,0.4); }
+.hero-stat .label { font-size: 11px; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.5px; }
+.hero-stat .value { font-size: 36px; font-weight: 800; margin-top: 8px; background: linear-gradient(135deg, #38BDF8, #00C9A7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-stat .value.growth { background: linear-gradient(135deg, #00C9A7, #38BDF8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-stat .sub { font-size: 13px; color: #64748B; margin-top: 4px; }
+
+/* CONTROLES PASO A PASO */
+.step-controls { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 20px; }
+.step-btn { width: 50px; height: 50px; border-radius: 50%; border: 2px solid rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.15); color: #38BDF8; font-size: 24px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; }
+.step-btn:hover { background: rgba(56, 189, 248, 0.3); border-color: #38BDF8; transform: scale(1.1); box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }
+.step-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; border-color: rgba(56, 189, 248, 0.2); }
+.step-indicator { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 16px; padding: 15px 30px; text-align: center; min-width: 200px; }
+.step-indicator .year { font-size: 14px; color: #94A3B8; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 4px; }
+.step-indicator .amount { font-size: 28px; font-weight: 800; background: linear-gradient(90deg, #38BDF8, #00C9A7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.step-indicator .growth { font-size: 13px; color: #64748B; margin-top: 4px; }
+.step-dots { display: flex; gap: 8px; justify-content: center; margin-top: 15px; }
+.step-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(56, 189, 248, 0.2); transition: all 0.3s ease; }
+.step-dot.active { background: #38BDF8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); transform: scale(1.3); }
+
+/* CONTENEDOR DEL GRAFICO */
+.hero-chart-wrapper { position: relative; height: 350px; }
+.hero-chart-container { height: 100%; }
+
+/* TOOLTIP AL LADO DEL PUNTO */
+.point-tooltip {
+  position: absolute;
+  background: linear-gradient(135deg, rgba(15,23,42,0.98), rgba(30,41,59,0.98));
+  border: 2px solid #38BDF8;
+  border-radius: 12px;
+  padding: 10px 16px;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(20px, -50%) scale(0.85);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 8px 32px rgba(56,189,248,0.4), 0 0 30px rgba(56,189,248,0.15);
+  backdrop-filter: blur(12px);
+  min-width: 120px;
+  text-align: center;
+}
+.point-tooltip.show { opacity: 1; transform: translate(20px, -50%) scale(1); }
+.point-tooltip .pt-year { font-size: 12px; color: #94A3B8; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 4px; }
+.point-tooltip .pt-amount { font-size: 20px; font-weight: 800; color: #38BDF8; background: linear-gradient(90deg, #38BDF8, #00C9A7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.point-tooltip .pt-growth { font-size: 12px; color: #00C9A7; font-weight: 600; margin-top: 2px; }
+
+.hero-controls-bottom { display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+.hero-btn { padding: 12px 28px; border-radius: 12px; border: 1px solid rgba(56,189,248,0.3); background: rgba(56,189,248,0.1); color: #94A3B8; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+.hero-btn:hover { background: rgba(56,189,248,0.25); color: #38BDF8; border-color: #38BDF8; box-shadow: 0 0 20px rgba(56,189,248,0.2); }
+.hero-btn.active { background: linear-gradient(135deg, #38BDF8, #00C9A7); color: #0F172A; border-color: transparent; font-weight: 700; }
+
+/* CARRUSEL */
+.carousel-section { margin-bottom: 30px; }
+.carousel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.carousel-header h2 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; color: #E2E8F0; }
+.carousel-nav { display: flex; gap: 10px; }
+.carousel-nav button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(56,189,248,0.3); background: rgba(56,189,248,0.1); color: #38BDF8; font-size: 18px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; }
+.carousel-nav button:hover { background: rgba(56,189,248,0.3); transform: scale(1.1); }
+.carousel-container { display: flex; gap: 18px; overflow-x: auto; padding: 10px 5px 20px; scroll-behavior: smooth; scroll-snap-type: x mandatory; }
+.carousel-container::-webkit-scrollbar { height: 6px; }
+.carousel-container::-webkit-scrollbar-track { background: transparent; }
+.carousel-container::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius: 3px; }
+.empresa-card { min-width: 220px; background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 22px; cursor: pointer; transition: all 0.4s ease; scroll-snap-align: start; position: relative; overflow: hidden; }
+.empresa-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--card-color); opacity: 0.7; }
+.empresa-card:hover { transform: translateY(-8px) scale(1.02); border-color: var(--card-color); box-shadow: 0 15px 40px rgba(0,0,0,0.4), 0 0 30px var(--card-glow); }
+.empresa-card.active { border-color: var(--card-color); background: rgba(30,41,59,0.9); box-shadow: 0 0 30px var(--card-glow); }
+.empresa-card .rank-badge { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; }
+.empresa-card .rank-badge.gold { background: linear-gradient(135deg, #FFD700, #FFA500); color: #1E293B; }
+.empresa-card .rank-badge.silver { background: linear-gradient(135deg, #C0C0C0, #E8E8E8); color: #1E293B; }
+.empresa-card .rank-badge.bronze { background: linear-gradient(135deg, #CD7F32, #D4A574); color: #1E293B; }
+.empresa-card .rank-badge.normal { background: rgba(56,189,248,0.2); color: #38BDF8; }
+.empresa-card .emp-name { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; margin-top: 8px; }
+.empresa-card .emp-div { font-size: 11px; color: var(--card-color); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+.empresa-card .emp-monto { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.empresa-card .emp-growth { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
+.empresa-card .emp-growth.up { background: rgba(0,201,167,0.15); color: #00C9A7; }
+.empresa-card .emp-growth.down { background: rgba(239,68,68,0.15); color: #EF4444; }
+.empresa-card .emp-chart { height: 50px; margin-top: 12px; }
+
+/* RADAR */
+.radar-section { background: rgba(30,41,59,0.5); border: 1px solid rgba(56,189,248,0.15); border-radius: 24px; padding: 30px; margin-bottom: 30px; }
+.radar-section h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #E2E8F0; }
+.radar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; align-items: center; }
+.radar-chart-container { height: 350px; }
+.division-legend { display: flex; flex-direction: column; gap: 12px; }
+.legend-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; border: 1px solid transparent; }
+.legend-item:hover { background: rgba(56,189,248,0.08); border-color: rgba(56,189,248,0.2); }
+.legend-item.active { background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.3); }
+.legend-color { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+.legend-info { flex: 1; }
+.legend-name { font-size: 14px; font-weight: 600; color: #E2E8F0; }
+.legend-pct { font-size: 12px; color: #94A3B8; }
+.legend-bar { width: 100px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+.legend-bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+
+/* SIMULATOR */
+.simulator-section { background: linear-gradient(135deg, rgba(0,86,210,0.1), rgba(56,189,248,0.05)); border: 1px solid rgba(56,189,248,0.2); border-radius: 24px; padding: 30px; margin-bottom: 30px; }
+.simulator-section h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #E2E8F0; }
+.simulator-controls { display: flex; align-items: center; gap: 25px; margin-bottom: 25px; flex-wrap: wrap; }
+.simulator-slider-container { flex: 1; min-width: 300px; }
+.simulator-slider-container label { display: flex; justify-content: space-between; font-size: 13px; color: #94A3B8; margin-bottom: 10px; }
+.simulator-slider-container label span { color: #38BDF8; font-weight: 700; }
+.simulator-slider { width: 100%; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #0056D2, #38BDF8, #00C9A7); -webkit-appearance: none; appearance: none; outline: none; }
+.simulator-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 0 15px rgba(56,189,248,0.5); cursor: pointer; }
+.simulator-result { background: rgba(15,23,42,0.6); border-radius: 16px; padding: 20px; }
+.simulator-result h3 { font-size: 14px; color: #94A3B8; margin-bottom: 15px; }
+.sim-result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.sim-result-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: rgba(30,41,59,0.5); }
+.sim-result-item .sim-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.sim-result-item .sim-name { font-size: 13px; font-weight: 600; color: #E2E8F0; flex: 1; }
+.sim-result-item .sim-need { font-size: 13px; font-weight: 700; }
+.sim-result-item .sim-need.positive { color: #00C9A7; }
+.sim-result-item .sim-need.negative { color: #EF4444; }
+
+/* HEATMAP */
+.heatmap-section { background: rgba(30,41,59,0.5); border: 1px solid rgba(56,189,248,0.15); border-radius: 24px; padding: 30px; margin-bottom: 30px; }
+.heatmap-section h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #E2E8F0; }
+.heatmap-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.heatmap-cell { aspect-ratio: 1; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; padding: 8px; text-align: center; }
+.heatmap-cell:hover { transform: scale(1.1); border-color: #fff; z-index: 10; }
+.heatmap-cell .h-name { font-size: 10px; font-weight: 600; color: #fff; line-height: 1.2; margin-bottom: 4px; }
+.heatmap-cell .h-growth { font-size: 11px; font-weight: 700; }
+
+/* DETAIL */
+.detail-panel { background: linear-gradient(135deg, rgba(56,189,248,0.1), rgba(0,201,167,0.05)); border: 1px solid rgba(56,189,248,0.2); border-radius: 24px; padding: 30px; margin-bottom: 30px; display: none; }
+.detail-panel.show { display: block; animation: fadeIn 0.5s ease; }
+.detail-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.detail-panel-title { font-size: 24px; font-weight: 800; color: #fff; }
+.detail-panel-sub { font-size: 14px; color: #94A3B8; }
+.detail-panel-tag { font-size: 12px; padding: 5px 14px; border-radius: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.detail-chart-container { height: 300px; }
+
+/* FOOTER */
+.footer { text-align: center; padding: 25px; color: #475569; font-size: 13px; border-top: 1px solid rgba(56,189,248,0.1); margin-top: 20px; }
+.btn { padding: 10px 20px; border-radius: 10px; border: 1px solid rgba(56,189,248,0.3); background: rgba(56,189,248,0.1); color: #94A3B8; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+.btn:hover { background: rgba(56,189,248,0.25); color: #38BDF8; border-color: #38BDF8; }
+.btn-reset { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.3); color: #EF4444; }
+.btn-reset:hover { background: rgba(239,68,68,0.3); color: #FCA5A5; }
+
+@media (max-width: 900px) {
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .radar-grid { grid-template-columns: 1fr; }
+  .heatmap-grid { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo-area">
+      <img src="data:image/png;base64,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" alt="GPS Logo" class="logo-gps">
+      <div class="title-area">
+        <h1>El Ascenso de GPS</h1>
+        <p>Ventas Netas 2020-2025 - Evolucion del Grupo</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero-section">
+    <div class="hero-title"><span class="star">&#11088;</span> Crecimiento GPS General</div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="label">Ventas 2025</div><div class="value">S/ 887.6M</div><div class="sub">Total consolidado</div></div>
+      <div class="hero-stat"><div class="label">Ventas 2020</div><div class="value">S/ 478.0M</div><div class="sub">Ano base</div></div>
+      <div class="hero-stat"><div class="label">Crecimiento Total</div><div class="value growth">+85.7%</div><div class="sub">2020 a 2025</div></div>
+      <div class="hero-stat"><div class="label">Empresas Activas</div><div class="value">25</div><div class="sub">En 6 divisiones</div></div>
+    </div>
+
+    <div class="step-controls">
+      <button class="step-btn" id="btnPrev">&#9664;</button>
+      <div class="step-indicator">
+        <div class="year">Ano <span id="currentYear">2020</span></div>
+        <div class="amount" id="currentAmount">S/ 478.0M</div>
+        <div class="growth" id="currentGrowth">-</div>
+      </div>
+      <button class="step-btn" id="btnNext">&#9654;</button>
+    </div>
+    <div class="step-dots" id="stepDots">
+      <div class="step-dot active" data-index="0"></div>
+      <div class="step-dot" data-index="1"></div>
+      <div class="step-dot" data-index="2"></div>
+      <div class="step-dot" data-index="3"></div>
+      <div class="step-dot" data-index="4"></div>
+      <div class="step-dot" data-index="5"></div>
+    </div>
+
+    <div class="hero-chart-wrapper">
+      <div class="hero-chart-container"><canvas id="heroChart"></canvas></div>
+    </div>
+
+    <div class="hero-controls-bottom">
+      <button class="hero-btn active" id="btnArea" data-type="area">&#127754; Area</button>
+      <button class="hero-btn" id="btnLine" data-type="line">&#128200; Linea</button>
+      <button class="hero-btn" id="btnBar" data-type="bar">&#128202; Barras</button>
+    </div>
+  </div>
+
+  <!-- CARRUSEL -->
+  <div class="carousel-section">
+    <div class="carousel-header">
+      <h2><span>&#127905;</span> Top Empresas por Ventas 2025</h2>
+      <div class="carousel-nav">
+        <button id="carouselPrev">&#9664;</button>
+        <button id="carouselNext">&#9654;</button>
+      </div>
+    </div>
+    <div class="carousel-container" id="carouselContainer"></div>
+  </div>
+
+  <!-- RADAR -->
+  <div class="radar-section">
+    <h2><span>&#127905;</span> Distribucion por Division</h2>
+    <div class="radar-grid">
+      <div class="radar-chart-container"><canvas id="radarChart"></canvas></div>
+      <div class="division-legend" id="divisionLegend"></div>
+    </div>
+  </div>
+
+  <!-- SIMULATOR -->
+  <div class="simulator-section">
+    <h2><span>&#127918;</span> Simulador: Cuanto necesita crecer cada empresa para 2026?</h2>
+    <div class="simulator-controls">
+      <div class="simulator-slider-container">
+        <label>Meta de Ventas Grupo 2026: <span id="metaValue">S/ 1,000M</span></label>
+        <input type="range" class="simulator-slider" id="metaSlider" min="900" max="1200" value="1000" step="10">
+      </div>
+    </div>
+    <div class="simulator-result">
+      <h3>Crecimiento necesario por empresa (2025 a 2026):</h3>
+      <div class="sim-result-grid" id="simResultGrid"></div>
+    </div>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="heatmap-section">
+    <h2><span>&#128293;</span> Mapa de Calor: Crecimiento 2024 a 2025</h2>
+    <div class="heatmap-grid" id="heatmapGrid"></div>
+  </div>
+
+  <!-- DETALLE -->
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-panel-header">
+      <div>
+        <div class="detail-panel-title" id="detailTitle">Empresa</div>
+        <div class="detail-panel-sub" id="detailSub"></div>
+        <span class="detail-panel-tag" id="detailTag">DIVISION</span>
+      </div>
+      <button class="btn btn-reset" id="btnCloseDetail">Cerrar</button>
+    </div>
+    <div class="detail-chart-container"><canvas id="detailChart"></canvas></div>
+  </div>
+
+  <div class="footer">Grupo GPS - El Ascenso 2020-2025 | Datos actualizados al cierre 2025</div>
+</div>
+
+<script>
+const vtaData = [{"empresa": "DEPSA", "division": "ABARROTES", "nombre_completo": "DEPSA VENTAS NETAS", "evolucion": {"2020": {"monto": 187729472.0, "pct": null}, "2021": {"monto": 186355277.0, "pct": null}, "2022": {"monto": 218130141.51999995, "pct": null}, "2023": {"monto": 222508754.0, "pct": null}, "2024": {"monto": 237225873.0, "pct": null}, "2025": {"monto": 268721237.1, "pct": 30.28}}, "monto_2025": 268721237.1, "pct_2025": 30.28, "color": "#FF6B35"}, {"empresa": "ALSE", "division": "ABARROTES", "nombre_completo": "ALSE VENTAS NETAS", "evolucion": {"2020": {"monto": 171908533.0, "pct": null}, "2021": {"monto": 187407147.0, "pct": null}, "2022": {"monto": 213739639.0, "pct": null}, "2023": {"monto": 214383451.0, "pct": null}, "2024": {"monto": 210434234.0, "pct": null}, "2025": {"monto": 246360482.0, "pct": 27.76}}, "monto_2025": 246360482.0, "pct_2025": 27.76, "color": "#FF6B35"}, {"empresa": "ECONOMYSA", "division": "ABARROTES", "nombre_completo": "ECONOMYSA VENTAS NETAS", "evolucion": {"2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": 77465113.34, "pct": null}, "2024": {"monto": 90629587.22999999, "pct": null}, "2025": {"monto": 86225814.39999999, "pct": 9.71}}, "monto_2025": 86225814.39999999, "pct_2025": 9.71, "color": "#FF6B35"}, {"empresa": "MISA", "division": "BEBIDAS", "nombre_completo": "MISA VENTAS NETAS", "evolucion": {"2020": {"monto": 48913628.0, "pct": null}, "2021": {"monto": 61662293.0, "pct": null}, "2022": {"monto": 70923070.0, "pct": null}, "2023": {"monto": 83350186.0, "pct": null}, "2024": {"monto": 76299344.0, "pct": null}, "2025": {"monto": 77350486.0, "pct": 8.71}}, "monto_2025": 77350486.0, "pct_2025": 8.71, "color": "#00C9A7"}, {"empresa": "ALSE", "division": "BEBIDAS", "nombre_completo": "ALSE VENTAS NETAS", "evolucion": {"2020": {"monto": 26640985.0, "pct": null}, "2021": {"monto": 40741678.0, "pct": null}, "2022": {"monto": 48077129.0, "pct": null}, "2023": {"monto": 46227092.0, "pct": null}, "2024": {"monto": 45676385.0, "pct": null}, "2025": {"monto": 46243050.0, "pct": 5.21}}, "monto_2025": 46243050.0, "pct_2025": 5.21, "color": "#00C9A7"}, {"empresa": "PETRORED", "division": "VARIOS", "nombre_completo": "PETRORED VENTAS NETAS", "evolucion": {"2020": {"monto": 5234189.0, "pct": null}, "2021": {"monto": 10588005.0, "pct": null}, "2022": {"monto": 23477874.0, "pct": null}, "2023": {"monto": 20803643.0, "pct": null}, "2024": {"monto": 24159061.0, "pct": null}, "2025": {"monto": 34430095.0, "pct": 3.88}}, "monto_2025": 34430095.0, "pct_2025": 3.88, "color": "#9B59B6"}, {"empresa": "DEPSA", "division": "PRODUCCION", "nombre_completo": "DEPSA VENTAS NETAS", "evolucion": {"2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": 8020876.0, "pct": null}, "2024": {"monto": 33077937.0, "pct": null}, "2025": {"monto": 26439296.0, "pct": 2.98}}, "monto_2025": 26439296.0, "pct_2025": 2.98, "color": "#0056D2"}, {"empresa": "DESEL", "division": "ABARROTES", "nombre_completo": "DESEL VENTAS NETAS", "evolucion": {"2020": {"monto": 20842563.31, "pct": null}, "2021": {"monto": 21833715.97, "pct": null}, "2022": {"monto": 23038138.67, "pct": null}, "2023": {"monto": 23075643.13, "pct": null}, "2024": {"monto": 23346329.87, "pct": null}, "2025": {"monto": 26153040.0, "pct": 2.95}}, "monto_2025": 26153040.0, "pct_2025": 2.95, "color": "#FF6B35"}, {"empresa": "CIIA", "division": "INMOBILIARIA", "nombre_completo": "CIIA VENTAS NETAS", "evolucion": {"2020": {"monto": 955245.4728, "pct": null}, "2021": {"monto": 2198341.69, "pct": null}, "2022": {"monto": 10067403.370000001, "pct": null}, "2023": {"monto": 8474041.05, "pct": null}, "2024": {"monto": 10592417.0, "pct": null}, "2025": {"monto": 17243167.410000004, "pct": 1.94}}, "monto_2025": 17243167.410000004, "pct_2025": 1.94, "color": "#E74C3C"}, {"empresa": "CHASQUICARGO", "division": "VARIOS", "nombre_completo": "CHASQUICARGO VENTAS NETAS", "evolucion": {"2020": {"monto": 8161001.0, "pct": null}, "2021": {"monto": 9264717.0, "pct": null}, "2022": {"monto": 11224072.0, "pct": null}, "2023": {"monto": 11452843.0, "pct": null}, "2024": {"monto": 12632771.0, "pct": null}, "2025": {"monto": 12725489.0, "pct": 1.43}}, "monto_2025": 12725489.0, "pct_2025": 1.43, "color": "#9B59B6"}, {"empresa": "PANES", "division": "PRODUCCION", "nombre_completo": "PANES VENTAS NETAS", "evolucion": {"2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": 7460169.0, "pct": null}, "2023": {"monto": 15440917.0, "pct": null}, "2024": {"monto": 13875105.0, "pct": null}, "2025": {"monto": 10416025.0, "pct": 1.17}}, "monto_2025": 10416025.0, "pct_2025": 1.17, "color": "#0056D2"}, {"empresa": "INKA MIKUNA", "division": "PRODUCCION", "nombre_completo": "INKA MIKUNA VENTAS NETAS", "evolucion": {"2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": 2462787.14, "pct": null}, "2024": {"monto": 7697184.0, "pct": null}, "2025": {"monto": 10229652.0, "pct": 1.15}}, "monto_2025": 10229652.0, "pct_2025": 1.15, "color": "#0056D2"}, {"empresa": "MISA", "division": "ABARROTES", "nombre_completo": "MISA VENTAS NETAS", "evolucion": {"2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": 959609.0, "pct": null}, "2024": {"monto": 4851854.48, "pct": null}, "2025": {"monto": 6093809.26, "pct": 0.69}}, "monto_2025": 6093809.26, "pct_2025": 0.69, "color": "#FF6B35"}, {"empresa": "ROMA", "division": "PRODUCCION", "nombre_completo": "ROMA VENTAS NETAS", "evolucion": {"2020": {"monto": 1907776.0, "pct": null}, "2021": {"monto": 3203608.0, "pct": null}, "2022": {"monto": 3963318.0, "pct": null}, "2023": {"monto": 3429297.0, "pct": null}, "2024": {"monto": 4071542.0, "pct": null}, "2025": {"monto": 4976665.0, "pct": 0.56}}, "monto_2025": 4976665.0, "pct_2025": 0.56, "color": "#0056D2"}, {"empresa": "INKA MIKUNA", "division": "PRODUCCION", "nombre_completo": "INKA MIKUNA VENTAS NETAS", "evolucion": {"2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": 1478426.0, "pct": null}, "2023": {"monto": 1622574.81, "pct": null}, "2024": {"monto": 2053189.0, "pct": null}, "2025": {"monto": 2820707.0, "pct": 0.32}}, "monto_2025": 2820707.0, "pct_2025": 0.32, "color": "#0056D2"}, {"empresa": "PO-PLAST", "division": "PRODUCCION", "nombre_completo": "PO-PLAST VENTAS NETAS", "evolucion": {"2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": null, "pct": null}, "2024": {"monto": 1119328.0, "pct": null}, "2025": {"monto": 2739701.0, "pct": 0.31}}, "monto_2025": 2739701.0, "pct_2025": 0.31, "color": "#0056D2"}, {"empresa": "AGROSAN", "division": "PRODUCCION", "nombre_completo": "AGROSAN VENTAS NETAS", "evolucion": {"2020": {"monto": 1838765.0, "pct": null}, "2021": {"monto": 2479131.0, "pct": null}, "2022": {"monto": 3825002.0, "pct": null}, "2023": {"monto": 4594650.0, "pct": null}, "2024": {"monto": 3110121.0, "pct": null}, "2025": {"monto": 2325839.0, "pct": 0.26}}, "monto_2025": 2325839.0, "pct_2025": 0.26, "color": "#0056D2"}, {"empresa": "PERU-PAST", "division": "PRODUCCION", "nombre_completo": "PERU-PAST VENTAS NETAS", "evolucion": {"2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": null, "pct": null}, "2024": {"monto": 1231491.0, "pct": null}, "2025": {"monto": 2209902.0, "pct": 0.25}}, "monto_2025": 2209902.0, "pct_2025": 0.25, "color": "#0056D2"}, {"empresa": "IIS", "division": "INMOBILIARIA", "nombre_completo": "IIS VENTAS NETAS", "evolucion": {"2020": {"monto": null, "pct": null}, "2021": {"monto": 56250.68, "pct": null}, "2022": {"monto": 1020000.0, "pct": null}, "2023": {"monto": 1080000.0, "pct": null}, "2024": {"monto": 1080000.0, "pct": null}, "2025": {"monto": 1080000.0, "pct": 0.12}}, "monto_2025": 1080000.0, "pct_2025": 0.12, "color": "#E74C3C"}, {"empresa": "DEPSA", "division": "INMOBILIARIA", "nombre_completo": "DEPSA VENTAS NETAS", "evolucion": {"2020": {"monto": 1704475.6400000001, "pct": null}, "2021": {"monto": 1848782.91, "pct": null}, "2022": {"monto": 2159639.3299999996, "pct": null}, "2023": {"monto": 2268840.6999999997, "pct": null}, "2024": {"monto": 2368074.3000000003, "pct": null}, "2025": {"monto": 868212.51, "pct": 0.1}}, "monto_2025": 868212.51, "pct_2025": 0.1, "color": "#E74C3C"}, {"empresa": "MISA", "division": "INMOBILIARIA", "nombre_completo": "MISA VENTAS NETAS", "evolucion": {"2020": {"monto": 1844328.0, "pct": null}, "2021": {"monto": 2182631.0, "pct": null}, "2022": {"monto": 2305351.0, "pct": null}, "2023": {"monto": 2481837.0, "pct": null}, "2024": {"monto": 2415442.0, "pct": null}, "2025": {"monto": 756181.0, "pct": 0.09}}, "monto_2025": 756181.0, "pct_2025": 0.09, "color": "#E74C3C"}, {"empresa": "DEPSA", "division": "OPERADOR LOGISTICO", "nombre_completo": "DEPSA VENTAS NETAS", "evolucion": {"2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": null, "pct": null}, "2024": {"monto": null, "pct": null}, "2025": {"monto": 559847.42, "pct": 0.06}}, "monto_2025": 559847.42, "pct_2025": 0.06, "color": "#F1C40F"}, {"empresa": "INKATEL", "division": "VARIOS", "nombre_completo": "INKATEL VENTAS NETAS", "evolucion": {"2020": {"monto": 295609.0, "pct": null}, "2021": {"monto": 225688.0, "pct": null}, "2022": {"monto": 461062.0, "pct": null}, "2023": {"monto": 288532.61, "pct": null}, "2024": {"monto": 315356.34, "pct": null}, "2025": {"monto": 542076.09, "pct": 0.06}}, "monto_2025": 542076.09, "pct_2025": 0.06, "color": "#9B59B6"}, {"empresa": "DEPSA", "division": "OPERADOR LOGISTICO", "nombre_completo": "DEPSA VENTAS NETAS", "evolucion": {"2020": {"monto": null, "pct": null}, "2021": {"monto": null, "pct": null}, "2022": {"monto": null, "pct": null}, "2023": {"monto": null, "pct": null}, "2024": {"monto": null, "pct": null}, "2025": {"monto": 55490.76, "pct": 0.01}}, "monto_2025": 55490.76, "pct_2025": 0.01, "color": "#F1C40F"}, {"empresa": "ALSE", "division": "INMOBILIARIA", "nombre_completo": "ALSE VENTAS NETAS", "evolucion": {"2020": {"monto": 60000.0, "pct": null}, "2021": {"monto": 60000.0, "pct": null}, "2022": {"monto": 60000.0, "pct": null}, "2023": {"monto": 60000.0, "pct": null}, "2024": {"monto": 49500.0, "pct": null}, "2025": {"monto": 18000.0, "pct": 0.0}}, "monto_2025": 18000.0, "pct_2025": 0, "color": "#E74C3C"}];
+const divisionSummary = {"ABARROTES": {"total": 633554382.76, "empresas": 5, "color": "#FF6B35"}, "BEBIDAS": {"total": 123593536.0, "empresas": 2, "color": "#00C9A7"}, "VARIOS": {"total": 47697660.09, "empresas": 3, "color": "#9B59B6"}, "PRODUCCION": {"total": 62157787.0, "empresas": 8, "color": "#0056D2"}, "INMOBILIARIA": {"total": 19965560.920000006, "empresas": 5, "color": "#E74C3C"}, "OPERADOR LOGISTICO": {"total": 615338.18, "empresas": 2, "color": "#F1C40F"}};
+const gpsEvolucion = {"2020": {"monto": 478036570.4228, "pct": 100.0}, "2021": {"monto": 530107266.25, "pct": 100.0}, "2022": {"monto": 641410434.89, "pct": 100.0}, "2023": {"monto": 750450687.78, "pct": 100.0}, "2024": {"monto": 808312126.22, "pct": 100.0}, "2025": {"monto": 887584264.95, "pct": 100.0}};
+const divisionColors = {
+    'ABARROTES': '#FF6B35',
+    'BEBIDAS': '#00C9A7',
+    'PRODUCCION': '#0056D2',
+    'VARIOS': '#9B59B6',
+    'INMOBILIARIA': '#E74C3C',
+    'OPERADOR LOGISTICO': '#F1C40F'
+};
+
+let heroChart = null;
+let radarChart = null;
+let detailChart = null;
+let currentHeroType = 'area';
+let currentStepIndex = 0;
+
+function formatMonto(v) {
+  if (!v) return '-';
+  if (v >= 1000000) return 'S/ ' + (v/1000000).toFixed(1) + 'M';
+  if (v >= 1000) return 'S/ ' + (v/1000).toFixed(0) + 'K';
+  return 'S/ ' + v.toFixed(0);
+}
+
+// ==========================================
+// HERO CHART - CON TOOLTIP AL LADO DEL PUNTO
+// ==========================================
+function initHeroChart(type) {
+  var ctx = document.getElementById('heroChart').getContext('2d');
+  var years = ['2020','2021','2022','2023','2024','2025'];
+  var montos = years.map(function(y) { return gpsEvolucion[y] ? gpsEvolucion[y].monto / 1000000 : 0; });
+
+  if (heroChart) { heroChart.destroy(); heroChart = null; }
+
+  var gradient = ctx.createLinearGradient(0, 0, 0, 350);
+  gradient.addColorStop(0, 'rgba(56, 189, 248, 0.4)');
+  gradient.addColorStop(0.5, 'rgba(0, 201, 167, 0.2)');
+  gradient.addColorStop(1, 'rgba(56, 189, 248, 0.05)');
+
+  var visibleData = montos.map(function(v, i) {
+    return i <= currentStepIndex ? v : null;
+  });
+
+  var config = {
+    type: type === 'bar' ? 'bar' : 'line',
+    data: {
+      labels: years,
+      datasets: [{
+        label: 'Ventas GPS (Millones S/)',
+        data: visibleData,
+        borderColor: '#38BDF8',
+        backgroundColor: type === 'area' ? gradient : 'rgba(56, 189, 248, 0.6)',
+        fill: type === 'area',
+        tension: 0.4,
+        pointRadius: function(context) {
+          return context.dataIndex === currentStepIndex ? 14 : 6;
+        },
+        pointHoverRadius: 14,
+        pointBackgroundColor: function(context) {
+          return context.dataIndex === currentStepIndex ? '#38BDF8' : '#fff';
+        },
+        pointBorderColor: '#38BDF8',
+        pointBorderWidth: 3,
+        borderWidth: type === 'bar' ? 0 : 4,
+        spanGaps: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#94A3B8', font: { size: 14, weight: '700' } },
+          grid: { color: 'rgba(255,255,255,0.05)' }
+        },
+        y: {
+          ticks: { color: '#94A3B8', callback: function(v) { return 'S/' + v + 'M'; } },
+          grid: { color: 'rgba(255,255,255,0.05)' }
+        }
+      },
+      animation: { 
+        duration: 800, 
+        easing: 'easeOutQuart',
+        onComplete: function() {
+          positionTooltipAtPoint();
+        }
+      }
+    }
+  };
+
+  if (type === 'bar') {
+    config.data.datasets[0].borderRadius = 12;
+    config.data.datasets[0].borderSkipped = false;
+  }
+
+  heroChart = new Chart(ctx, config);
+  updateStepIndicator();
+  setTimeout(positionTooltipAtPoint, 100);
+}
+
+function positionTooltipAtPoint() {
+  if (!heroChart) return;
+
+  var wrapper = document.querySelector('.hero-chart-wrapper');
+  if (!wrapper) return;
+
+  var oldTooltip = wrapper.querySelector('.point-tooltip');
+  if (oldTooltip) oldTooltip.remove();
+
+  var meta = heroChart.getDatasetMeta(0);
+  if (!meta || !meta.data || !meta.data[currentStepIndex]) return;
+
+  var point = meta.data[currentStepIndex];
+  var canvas = document.getElementById('heroChart');
+  var canvasRect = canvas.getBoundingClientRect();
+
+  var xPercent = (point.x / canvasRect.width) * 100;
+  var yPercent = (point.y / canvasRect.height) * 100;
+
+  var years = ['2020','2021','2022','2023','2024','2025'];
+  var montos = years.map(function(y) { return gpsEvolucion[y] ? gpsEvolucion[y].monto / 1000000 : 0; });
+  var currentYear = years[currentStepIndex];
+  var currentMonto = montos[currentStepIndex];
+  var prevMonto = currentStepIndex > 0 ? montos[currentStepIndex - 1] : null;
+  var growth = prevMonto ? ((currentMonto - prevMonto) / prevMonto * 100).toFixed(1) : null;
+
+  var tooltip = document.createElement('div');
+  tooltip.className = 'point-tooltip';
+  tooltip.innerHTML = 
+    '<div class="pt-year">' + currentYear + '</div>' +
+    '<div class="pt-amount">S/ ' + currentMonto.toFixed(1) + 'M</div>' +
+    (growth ? '<div class="pt-growth">' + (growth > 0 ? '+' : '') + growth + '%</div>' : '');
+
+  tooltip.style.left = xPercent + '%';
+  tooltip.style.top = yPercent + '%';
+
+  wrapper.appendChild(tooltip);
+
+  requestAnimationFrame(function() {
+    tooltip.classList.add('show');
+  });
+}
+
+function updateStepIndicator() {
+  document.querySelectorAll('.step-dot').forEach(function(dot, i) {
+    dot.classList.toggle('active', i === currentStepIndex);
+  });
+  document.getElementById('btnPrev').disabled = currentStepIndex === 0;
+  document.getElementById('btnNext').disabled = currentStepIndex === 5;
+}
+
+function prevStep() {
+  if (currentStepIndex > 0) {
+    currentStepIndex--;
+    initHeroChart(currentHeroType);
+  }
+}
+
+function nextStep() {
+  if (currentStepIndex < 5) {
+    currentStepIndex++;
+    initHeroChart(currentHeroType);
+  }
+}
+
+// ==========================================
+// CARRUSEL
+// ==========================================
+function renderCarousel() {
+  var container = document.getElementById('carouselContainer');
+  var html = '';
+  vtaData.forEach(function(d, i) {
+    var m2024 = d.evolucion['2024'] ? d.evolucion['2024'].monto : 0;
+    var m2025 = d.evolucion['2025'] ? d.evolucion['2025'].monto : 0;
+    var growth = m2024 > 0 ? ((m2025 - m2024) / m2024 * 100) : 0;
+    var growthClass = growth >= 0 ? 'up' : 'down';
+    var growthIcon = growth >= 0 ? '&#9650;' : '&#9660;';
+    var rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'normal';
+
+    var sparkData = ['2020','2021','2022','2023','2024','2025'].map(function(y) {
+      return d.evolucion[y] && d.evolucion[y].monto ? d.evolucion[y].monto / 1000000 : 0;
+    });
+    var sparkMax = Math.max.apply(null, sparkData);
+    var sparkMin = Math.min.apply(null, sparkData.filter(function(v) { return v > 0; }));
+    var sparkRange = sparkMax - sparkMin || 1;
+    var points = sparkData.map(function(v, idx) {
+      if (v === 0) return '';
+      var x = (idx / 5) * 100;
+      var y = 100 - ((v - sparkMin) / sparkRange * 80 + 10);
+      return x + ',' + y;
+    }).filter(function(p) { return p; }).join(' ');
+
+    html += '<div class="empresa-card" data-empresa="' + d.empresa + '" style="--card-color: ' + d.color + '; --card-glow: ' + d.color + '40;">' +
+      '<div class="rank-badge ' + rankClass + '">' + (i + 1) + '</div>' +
+      '<div class="emp-name">' + d.empresa + '</div>' +
+      '<div class="emp-div">' + d.division + '</div>' +
+      '<div class="emp-monto">' + formatMonto(m2025) + '</div>' +
+      '<div class="emp-growth ' + growthClass + '">' + growthIcon + ' ' + Math.abs(growth).toFixed(1) + '%</div>' +
+      '<svg class="emp-chart" viewBox="0 0 100 50" preserveAspectRatio="none">' +
+      '<polyline points="' + points + '" fill="none" stroke="' + d.color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>' +
+      '</div>';
+  });
+  container.innerHTML = html;
+  container.querySelectorAll('.empresa-card').forEach(function(card) {
+    card.addEventListener('click', function() { showEmpresaDetail(card.dataset.empresa); });
+  });
+}
+
+// ==========================================
+// RADAR
+// ==========================================
+function initRadarChart() {
+  var ctx = document.getElementById('radarChart').getContext('2d');
+  var divs = Object.keys(divisionSummary);
+  var values = divs.map(function(d) { return divisionSummary[d].total / 1000000; });
+  var colors = divs.map(function(d) { return divisionSummary[d].color; });
+  var total = values.reduce(function(s, v) { return s + v; }, 0);
+  var pcts = values.map(function(v) { return (v / total * 100).toFixed(1); });
+
+  radarChart = new Chart(ctx, {
+    type: 'polarArea',
+    data: {
+      labels: divs,
+      datasets: [{
+        data: values,
+        backgroundColor: colors.map(function(c) { return c + 'CC'; }),
+        borderColor: colors,
+        borderWidth: 2,
+        hoverBorderWidth: 4,
+        hoverBorderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+          titleColor: '#38BDF8',
+          bodyColor: '#E2E8F0',
+          borderColor: 'rgba(56, 189, 248, 0.3)',
+          borderWidth: 1,
+          padding: 12,
+          callbacks: {
+            label: function(context) {
+              var idx = context.dataIndex;
+              return [
+                'Ventas: ' + formatMonto(divisionSummary[divs[idx]].total),
+                'Participacion: ' + pcts[idx] + '%',
+                'Empresas: ' + divisionSummary[divs[idx]].empresas
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        r: {
+          ticks: { display: false, backdropColor: 'transparent' },
+          grid: { color: 'rgba(255,255,255,0.1)' },
+          pointLabels: { color: '#E2E8F0', font: { size: 12, weight: '600' } }
+        }
+      },
+      onClick: function(e, elements) {
+        if (elements.length > 0) filterCarouselByDivision(divs[elements[0].index]);
+      }
+    }
+  });
+
+  var legendContainer = document.getElementById('divisionLegend');
+  var legendHtml = '';
+  divs.forEach(function(div, i) {
+    var info = divisionSummary[div];
+    legendHtml += '<div class="legend-item" data-div="' + div + '">' +
+      '<div class="legend-color" style="background: ' + info.color + ';"></div>' +
+      '<div class="legend-info"><div class="legend-name">' + div + '</div><div class="legend-pct">' + pcts[i] + '% - ' + formatMonto(info.total) + '</div></div>' +
+      '<div class="legend-bar"><div class="legend-bar-fill" style="width: ' + pcts[i] + '%; background: ' + info.color + ';"></div></div>' +
+      '</div>';
+  });
+  legendContainer.innerHTML = legendHtml;
+  legendContainer.querySelectorAll('.legend-item').forEach(function(item) {
+    item.addEventListener('click', function() { filterCarouselByDivision(item.dataset.div); });
+  });
+}
+
+function filterCarouselByDivision(div) {
+  var cards = document.querySelectorAll('.empresa-card');
+  cards.forEach(function(card) {
+    var emp = vtaData.find(function(d) { return d.empresa === card.dataset.empresa; });
+    if (emp && emp.division === div) {
+      card.style.opacity = '1'; card.style.transform = 'scale(1.05)'; card.classList.add('active');
+    } else {
+      card.style.opacity = '0.3'; card.style.transform = 'scale(1)'; card.classList.remove('active');
+    }
+  });
+  setTimeout(function() {
+    cards.forEach(function(card) { card.style.opacity = '1'; card.style.transform = ''; card.classList.remove('active'); });
+  }, 3000);
+}
+
+// ==========================================
+// SIMULADOR
+// ==========================================
+function initSimulator() {
+  var slider = document.getElementById('metaSlider');
+  var valueDisplay = document.getElementById('metaValue');
+  var resultGrid = document.getElementById('simResultGrid');
+
+  function updateSimulator() {
+    var meta = parseInt(slider.value) * 1000000;
+    var total2025 = vtaData.reduce(function(s, d) { return s + d.monto_2025; }, 0);
+    var factor = meta / total2025;
+    valueDisplay.textContent = 'S/ ' + slider.value + 'M';
+
+    var html = '';
+    vtaData.slice(0, 10).forEach(function(d) {
+      var needed2026 = d.monto_2025 * factor;
+      var growthNeeded = ((needed2026 - d.monto_2025) / d.monto_2025 * 100);
+      var isPositive = growthNeeded >= 0;
+      html += '<div class="sim-result-item">' +
+        '<div class="sim-dot" style="background: ' + d.color + ';"></div>' +
+        '<div class="sim-name">' + d.empresa + '</div>' +
+        '<div class="sim-need ' + (isPositive ? 'positive' : 'negative') + '">' +
+        (isPositive ? '+' : '') + growthNeeded.toFixed(1) + '%' +
+        '</div>' +
+        '</div>';
+    });
+    resultGrid.innerHTML = html;
+  }
+
+  slider.addEventListener('input', updateSimulator);
+  updateSimulator();
+}
+
+// ==========================================
+// HEATMAP
+// ==========================================
+function renderHeatmap() {
+  var container = document.getElementById('heatmapGrid');
+  var html = '';
+  vtaData.forEach(function(d) {
+    var m2024 = d.evolucion['2024'] ? d.evolucion['2024'].monto : 0;
+    var m2025 = d.evolucion['2025'] ? d.evolucion['2025'].monto : 0;
+    var growth = m2024 > 0 ? ((m2025 - m2024) / m2024 * 100) : 0;
+    var r, g, b;
+    if (growth >= 20) { r = 0; g = 201; b = 167; }
+    else if (growth >= 10) { r = 56; g = 189; b = 248; }
+    else if (growth >= 0) { r = 250; g = 204; b = 21; }
+    else if (growth >= -10) { r = 251; g = 146; b = 60; }
+    else { r = 239; g = 68; b = 68; }
+    var alpha = Math.min(Math.abs(growth) / 50 + 0.3, 0.9);
+    var bgColor = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+    html += '<div class="heatmap-cell" data-empresa="' + d.empresa + '" style="background: ' + bgColor + ';">' +
+      '<div class="h-name">' + d.empresa + '</div>' +
+      '<div class="h-growth">' + (growth > 0 ? '+' : '') + growth.toFixed(1) + '%</div>' +
+      '</div>';
+  });
+  container.innerHTML = html;
+  container.querySelectorAll('.heatmap-cell').forEach(function(cell) {
+    cell.addEventListener('click', function() { showEmpresaDetail(cell.dataset.empresa); });
+  });
+}
+
+// ==========================================
+// DETALLE EMPRESA
+// ==========================================
+function showEmpresaDetail(empresa) {
+  var d = vtaData.find(function(x) { return x.empresa === empresa; });
+  if (!d) return;
+  var panel = document.getElementById('detailPanel');
+  panel.classList.add('show');
+  document.getElementById('detailTitle').textContent = d.nombre_completo;
+  document.getElementById('detailSub').textContent = 'Evolucion 2020-2025';
+  var tag = document.getElementById('detailTag');
+  tag.textContent = d.division;
+  tag.style.background = d.color + '30';
+  tag.style.color = d.color;
+  tag.style.border = '1px solid ' + d.color + '60';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  renderDetailChart(d);
+}
+
+function renderDetailChart(d) {
+  var ctx = document.getElementById('detailChart').getContext('2d');
+  var years = ['2020','2021','2022','2023','2024','2025'];
+  var montos = years.map(function(y) {
+    return d.evolucion[y] && d.evolucion[y].monto ? d.evolucion[y].monto / 1000000 : null;
+  });
+  if (detailChart) { detailChart.destroy(); detailChart = null; }
+  detailChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: years,
+      datasets: [{
+        label: 'Ventas (Millones S/)',
+        data: montos,
+        borderColor: d.color,
+        backgroundColor: d.color + '20',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 8,
+        pointHoverRadius: 14,
+        pointBackgroundColor: d.color,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 3,
+        borderWidth: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+          titleColor: '#38BDF8',
+          bodyColor: '#E2E8F0',
+          borderColor: 'rgba(56, 189, 248, 0.3)',
+          borderWidth: 1,
+          padding: 14,
+          callbacks: {
+            label: function(context) {
+              var val = context.raw;
+              var prev = context.dataIndex > 0 ? context.dataset.data[context.dataIndex - 1] : null;
+              var growth = prev && prev > 0 ? ((val - prev) / prev * 100).toFixed(1) : null;
+              var lines = ['Ventas: S/ ' + val.toFixed(1) + 'M'];
+              if (growth !== null) lines.push('Crecimiento: ' + (growth > 0 ? '+' : '') + growth + '%');
+              return lines;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { color: '#94A3B8', font: { size: 13 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { ticks: { color: '#94A3B8', callback: function(v) { return 'S/' + v + 'M'; } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+
+function closeDetail() {
+  document.getElementById('detailPanel').classList.remove('show');
+  if (detailChart) { detailChart.destroy(); detailChart = null; }
+}
+
+// ==========================================
+// CONTROLES
+// ==========================================
+function initHeroControls() {
+  document.querySelectorAll('.hero-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var type = btn.dataset.type;
+      if (type) {
+        document.querySelectorAll('.hero-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentHeroType = type;
+        initHeroChart(type);
+      }
+    });
+  });
+
+  document.getElementById('btnPrev').addEventListener('click', prevStep);
+  document.getElementById('btnNext').addEventListener('click', nextStep);
+}
+
+function initCarouselNav() {
+  var container = document.getElementById('carouselContainer');
+  document.getElementById('carouselPrev').addEventListener('click', function() {
+    container.scrollBy({ left: -250, behavior: 'smooth' });
+  });
+  document.getElementById('carouselNext').addEventListener('click', function() {
+    container.scrollBy({ left: 250, behavior: 'smooth' });
+  });
+}
+
+// ==========================================
+// INICIALIZACION
+// ==========================================
+document.addEventListener('DOMContentLoaded', function() {
+  initHeroChart('area');
+  renderCarousel();
+  initRadarChart();
+  initSimulator();
+  renderHeatmap();
+  initCarouselNav();
+  initHeroControls();
+  document.getElementById('btnCloseDetail').addEventListener('click', closeDetail);
+});
+</script>
+</body>
+</html>

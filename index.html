@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grupo GPS - Presentación Unificada 2025</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #050a14;
+    color: white;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+.slide-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+.slide-obj {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    transform: translateX(50px);
+}
+.slide-obj.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+    z-index: 10;
+}
+.slide-obj object {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+.nav-next-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+    filter: drop-shadow(0 4px 15px rgba(76, 175, 80, 0.4));
+}
+.nav-next-btn.visible { opacity: 1; transform: translateY(0); }
+.nav-next-btn:hover { transform: scale(1.08); filter: drop-shadow(0 6px 25px rgba(76, 175, 80, 0.6)); }
+.nav-prev-btn {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    z-index: 1000;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50px;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.nav-prev-btn.visible { opacity: 1; transform: translateY(0); }
+.nav-prev-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+.slide-indicator {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: rgba(15,23,42,0.8);
+    backdrop-filter: blur(10px);
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: 1px solid rgba(56,189,248,0.2);
+}
+.slide-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.3s; cursor: pointer; }
+.slide-dot.active { background: #38BDF8; box-shadow: 0 0 10px rgba(56,189,248,0.5); transform: scale(1.3); }
+.slide-label { font-size: 12px; color: #94A3B8; margin-left: 8px; font-weight: 600; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<div class="nav-next-btn visible" id="navNext" onclick="nextSlide()">
+    <svg width="160" height="50" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="gL" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#4CAF50"/><stop offset="100%" style="stop-color:#66BB6A"/></linearGradient>
+            <linearGradient id="gR" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#2E7D32"/><stop offset="100%" style="stop-color:#388E3C"/></linearGradient>
+        </defs>
+        <rect x="5" y="5" width="200" height="70" rx="35" fill="url(#gL)"/>
+        <path d="M195 5 L195 75 L260 75 A35 35 0 0 0 260 5 Z" fill="url(#gR)"/>
+        <text x="105" y="48" font-family="Arial" font-size="28" font-weight="800" fill="white" text-anchor="middle" letter-spacing="3">NEXT</text>
+        <g transform="translate(245,40)">
+            <path d="M-12-12 L0 0 L-12 12" stroke="white" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <path d="M0-12 L12 0 L0 12" stroke="white" stroke-width="5" fill="none" stroke-linecap="round"/>
+        </g>
+    </svg>
+</div>
+
+<div class="nav-prev-btn" id="navPrev" onclick="prevSlide()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+    ANTERIOR
+</div>
+
+<div class="slide-indicator">
+    <div class="slide-dot active" onclick="goToSlide(0)"></div>
+    <div class="slide-dot" onclick="goToSlide(1)"></div>
+    <div class="slide-dot" onclick="goToSlide(2)"></div>
+    <span class="slide-label" id="slideLabel">Ventas 2025</span>
+</div>
+
+<div class="slide-container">
+    <div class="slide-obj active" id="obj0"><object data="slide1.html" type="text/html"></object></div>
+    <div class="slide-obj" id="obj1"><object data="slide2.html" type="text/html"></object></div>
+    <div class="slide-obj" id="obj2"><object data="slide3.html" type="text/html"></object></div>
+</div>
+
+<script>
+let currentSlide = 0;
+const totalSlides = 3;
+const names = ['Ventas 2025', 'Rentabilidad 2025', 'Evolución 2020-2025'];
+
+function updateNav() {
+    document.querySelectorAll('.slide-obj').forEach((el, i) => el.classList.toggle('active', i === currentSlide));
+    document.querySelectorAll('.slide-dot').forEach((el, i) => el.classList.toggle('active', i === currentSlide));
+    document.getElementById('slideLabel').textContent = names[currentSlide];
+    document.getElementById('navPrev').classList.toggle('visible', currentSlide > 0);
+    document.getElementById('navNext').classList.toggle('visible', currentSlide < totalSlides - 1);
+}
+function goToSlide(i) { if (i >= 0 && i < totalSlides) { currentSlide = i; updateNav(); } }
+function nextSlide() { goToSlide(currentSlide + 1); }
+function prevSlide() { goToSlide(currentSlide - 1); }
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+});
+updateNav();
+</script>
+
+</body>
+</html>
