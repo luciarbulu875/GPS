@@ -410,6 +410,9 @@ function positionTooltipAtPoint() {
   var oldTooltip = wrapper.querySelector('.point-tooltip');
   if (oldTooltip) oldTooltip.remove();
 
+  // SOLO mostrar tooltip en año 2025 (index 5)
+  if (currentStepIndex !== 5) return;
+
   var meta = heroChart.getDatasetMeta(0);
   if (!meta || !meta.data || !meta.data[currentStepIndex]) return;
 
