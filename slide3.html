@@ -736,9 +736,17 @@ function renderDetailChart(d) {
         borderWidth: 4
       }]
     },
-    options: {
+ options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 20,
+          right: 80,
+          bottom: 10,
+          left: 10
+        }
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
