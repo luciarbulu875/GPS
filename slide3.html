@@ -453,6 +453,21 @@ function updateStepIndicator() {
   });
   document.getElementById('btnPrev').disabled = currentStepIndex === 0;
   document.getElementById('btnNext').disabled = currentStepIndex === 5;
+  updateCenterCard();
+}
+
+function updateCenterCard() {
+  var years = ['2020','2021','2022','2023','2024','2025'];
+  var montos = years.map(function(y) { return gpsEvolucion[y] ? gpsEvolucion[y].monto / 1000000 : 0; });
+  var currentYear = years[currentStepIndex];
+  var currentMonto = montos[currentStepIndex];
+  var prevMonto = currentStepIndex > 0 ? montos[currentStepIndex - 1] : null;
+  var growth = prevMonto ? ((currentMonto - prevMonto) / prevMonto * 100).toFixed(1) : null;
+  
+  document.getElementById('currentYear').textContent = currentYear;
+  document.getElementById('currentAmount').textContent = 'S/ ' + currentMonto.toFixed(1) + 'M';
+  document.getElementById('currentGrowth').textContent = growth ? (growth > 0 ? '+' : '') + growth + '% vs año anterior' : '-';
+  document.getElementById('currentGrowth').style.color = growth && growth > 0 ? '#00C9A7' : (growth && growth < 0 ? '#FF6B6B' : '#64748B');
 }
 
 function prevStep() {
